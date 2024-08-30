@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="Visualizer for neural network, deep learning and machine learning models." />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://cdnjs.cloudflare.com">
+    <meta name="version" content="0.0.0">
+    <meta name="date" content="">
+    <title>Netron</title>
+    <link rel="stylesheet" type="text/css" href="grapher.css">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon-precomposed" type="image/png" href="icon.png">
+    <link rel="fluid-icon" type="image/png" href="icon.png">
+    <script type="text/javascript" src="index.js"></script>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
+
+</head>
+
+<body class="welcome spinner">
+    <div id="sidebar" class="sidebar">
+        <h1 id="sidebar-title" class="sidebar-title"></h1>
+        <a id="sidebar-closebutton" class="sidebar-closebutton" href="javascript:void(0)" draggable="false">&times;</a>
+        <div id="sidebar-content" class="sidebar-content"></div>
+        <svg width="0" height="0" display="none">
+            <defs>
+                <symbol id="sidebar-icon-node" viewBox="0 0 20 20">
+                    <circle cx="10" cy="10" r="6" stroke-width="2" fill="none" />
+                </symbol>
+                <symbol id="sidebar-icon-connection" viewBox="0 0 20 20">
+                    <line x1="4" y1="10" x2="15" y2="10" stroke-width="2" />
+                    <polyline points="11,6 15,10 11,14" stroke-width="2" />
+                </symbol>
+                <symbol id="sidebar-icon-weight" viewBox="0 0 20 20">
+                    <circle cx="5" cy="5" r="1" />
+                    <circle cx="10" cy="5" r="1" />
+                    <circle cx="15" cy="5" r="1" />
+                    <circle cx="5" cy="10" r="1" />
+                    <circle cx="10" cy="10" r="1" />
+                    <circle cx="15" cy="10" r="1" />
+                    <circle cx="5" cy="15" r="1" />
+                    <circle cx="10" cy="15" r="1" />
+                    <circle cx="15" cy="15" r="1" />
+                </symbol>
+            </defs>
+        </svg>
+    </div>
+    <div id="toolbar" class="toolbar">
+        <button id="sidebar-button" class="toolbar-button" title="Model Properties">
+            <svg class="toolbar-icon" viewbox="0 0 100 100">
+                <rect class="border" x="12" y="12" width="76" height="76" rx="16" ry="16" stroke-width="8"></rect>
+                <line class="border" x1="28" y1="37" x2="32" y2="37" stroke-width="8" stroke-linecap="round"
+                    stroke="#fff"></line>
+                <line class="border" x1="28" y1="50" x2="32" y2="50" stroke-width="8" stroke-linecap="round"
+                    stroke="#fff"></line>
+                <line class="border" x1="28" y1="63" x2="32" y2="63" stroke-width="8" stroke-linecap="round"
+                    stroke="#fff"></line>
+                <line class="border" x1="40" y1="37" x2="70" y2="37" stroke-width="8" stroke-linecap="round"
+                    stroke="#fff"></line>
+                <line class="border" x1="40" y1="50" x2="70" y2="50" stroke-width="8" stroke-linecap="round"
+                    stroke="#fff"></line>
+                <line class="border" x1="40" y1="63" x2="70" y2="63" stroke-width="8" stroke-linecap="round"
+                    stroke="#fff"></line>
+                <rect class="stroke" x="12" y="12" width="76" height="76" rx="16" ry="16" stroke-width="4"></rect>
+                <line class="stroke" x1="28" y1="37" x2="32" y2="37" stroke-width="4" stroke-linecap="round"></line>
+                <line class="stroke" x1="28" y1="50" x2="32" y2="50" stroke-width="4" stroke-linecap="round"></line>
+                <line class="stroke" x1="28" y1="63" x2="32" y2="63" stroke-width="4" stroke-linecap="round"></line>
+                <line class="stroke" x1="40" y1="37" x2="70" y2="37" stroke-width="4" stroke-linecap="round"></line>
+                <line class="stroke" x1="40" y1="50" x2="70" y2="50" stroke-width="4" stroke-linecap="round"></line>
+                <line class="stroke" x1="40" y1="63" x2="70" y2="63" stroke-width="4" stroke-linecap="round"></line>
+            </svg>
+        </button>
+        <button id="zoom-in-button" class="toolbar-button" title="Zoom In">
+            <svg class="toolbar-icon" viewbox="0 0 100 100">
+                <circle class="border" cx="50" cy="50" r="35" stroke-width="8" stroke="#fff"></circle>
+                <line class="border" x1="50" y1="38" x2="50" y2="62" stroke-width="8" stroke-linecap="round"
+                    stroke="#fff"></line>
+                <line class="border" x1="38" y1="50" x2="62" y2="50" stroke-width="8" stroke-linecap="round"
+                    stroke="#fff"></line>
+                <line class="border" x1="78" y1="78" x2="82" y2="82" stroke-width="12" stroke-linecap="square"
+                    stroke="#fff"></line>
+                <circle class="stroke" cx="50" cy="50" r="35" stroke-width="4"></circle>
+                <line class="stroke" x1="50" y1="38" x2="50" y2="62" stroke-width="4" stroke-linecap="round"></line>
+                <line class="stroke" x1="38" y1="50" x2="62" y2="50" stroke-width="4" stroke-linecap="round"></line>
+                <line class="stroke" x1="78" y1="78" x2="82" y2="82" stroke-width="8" stroke-linecap="square"></line>
+            </svg>
+        </button>
+        <button id="zoom-out-button" class="toolbar-button" title="Zoom Out">
+            <svg class="toolbar-icon" viewbox="0 0 100 100">
+                <circle class="border" cx="50" cy="50" r="35" stroke-width="8" stroke="#fff"></circle>
+                <line class="border" x1="38" y1="50" x2="62" y2="50" stroke-width="8" stroke-linecap="round"
+                    stroke="#fff"></line>
+                <line class="border" x1="78" y1="78" x2="82" y2="82" stroke-width="12" stroke-linecap="square"
+                    stroke="#fff"></line>
+                <circle class="stroke" cx="50" cy="50" r="35" stroke-width="4"></circle>
+                <line class="stroke" x1="38" y1="50" x2="62" y2="50" stroke-width="4" stroke-linecap="round"></line>
+                <line class="stroke" x1="78" y1="78" x2="82" y2="82" stroke-width="8" stroke-linecap="square"></line>
+            </svg>
+        </button>
+        <div id="toolbar-path" class="toolbar-path">
+            <button id="toolbar-path-back-button" class="toolbar-path-back-button" title="Back">
+                &#x276E;
+            </button>
+        </div>
+    </div>
+    <div id="logo" class="logo">
+        <div class="graph-container">
+            <div class="miner-control">
+                <ul class="radio-switch ">
+                    <li class="radio-switch__item">
+                        <input class="radio-switch__input ri5-sr-only" type="radio" name="radio-switch-name"
+                            id="radio-1" value="all" checked>
+                        <label class="radio-switch__label" for="radio-1">All</label>
+                    </li>
+                    <li class="radio-switch__item">
+                        <input class="radio-switch__input ri5-sr-only" type="radio" name="radio-switch-name"
+                            id="radio-2" value="reward">
+                        <label class="radio-switch__label" for="radio-2">Pareto</label>
+                        <div aria-hidden="true" class="radio-switch__marker"></div>
+                    </li>
+                </ul>
+                <div class="slider-container">
+                    <div class="flops-container">
+                        <label for="params-slider" class="slider-title">Params</label>
+                        <input type="text" class="params-slider" name="params-slider" value="" />
+                    </div>
+                    <div class="flops-container">
+                        <label for="accuracy-slider" class="slider-title">Accuracy</label>
+                        <input type="text" class="accuracy-slider" name="accuracy-slider" value="" />
+                    </div>
+                    <div class="flops-container">
+                        <label for="flops-slider" class="slider-title">Flops</label>
+                        <input type="text" class="flops-slider" name="flops-slider" value="" />
+                    </div>
+                </div>
+                <div class="open-file-button">
+                    <label class="select-label" for="open-file-select">Select Miner UID:</label>
+                    <select id="open-file-select" class="open-file-select">
+                    </select>
+                </div>
+            </div>
+            <div id="graph" class="graph" tabindex="0">
+                <svg id="canvas" class="canvas" preserveaspectratio="xMidYMid meet" width="100%" height="100%">
+                </svg>
+            </div>
+            <div class="stats-container">
+                <div class="stats-bar">
+                    <p class="stats-value" id="uid-value">0</p>
+                </div>
+                <div class="stats-bar">
+                    <p class="stats-title">Score</p>
+                    <p class="stats-value" id="score-value">0.0315895333550392</p>
+                </div>
+                <div class="stats-bar">
+                    <div class="flex justify-between">
+                        <p class="stats-title">Params</p>
+                        <p class="stats-button" id="pareto">Pareto</p>
+                    </div>
+                    <p class="stats-value" id="params-value">46,000</p>
+                </div>
+                <div class="stats-bar">
+                    <div class="flex justify-between">
+                        <p class="stats-title">Flops</p>
+                    </div>
+                    <p class="stats-value" id="flops-value">13.0</p>
+                </div>
+                <div class="stats-bar">
+                    <p class="stats-title">Accuracy</p>
+                    <div class="progress-circle">
+                        <div class="circle">
+                            <div class="mask full">
+                                <div class="fill"></div>
+                            </div>
+                            <div class="mask half">
+                                <div class="fill"></div>
+                                <div class="fill fix"></div>
+                            </div>
+                            <div class="inside-circle">0%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stats-bar">
+                    <p class="stats-title">Commit Date</p>
+                    <p class="stats-date" id="commit-date">August 11, 2024, 3:20 PM (UTC) </p>
+                </div>
+                <div class="stats-bar">
+                    <p class="stats-title">Evaluate Date</p>
+                    <p class="stats-date" id="evaluate-date">August 11, 2024, 3:20 PM (UTC)</p>
+                </div>
+            </div>
+        </div>
+        <div class="logo-result">
+            <svg class="center logo-icon" viewbox="0 0 1024 1024">
+                <circle class="logo-stroke" cx="512" cy="512" r="431" fill="none" stroke-width="32"></circle>
+                <circle class="logo-border" cx="512" cy="512" r="450" fill="none" stroke-width="6"></circle>
+                <circle class="logo-border" cx="512" cy="512" r="412" fill="none" stroke-width="6"></circle>
+                <line class="logo-stroke" x1="296" y1="392" x2="540" y2="280" stroke-width="12"></line>
+                <line class="logo-stroke" x1="296" y1="632" x2="540" y2="280" stroke-width="12"></line>
+                <line class="logo-stroke" x1="296" y1="392" x2="540" y2="435" stroke-width="12"></line>
+                <line class="logo-stroke" x1="296" y1="632" x2="540" y2="435" stroke-width="12"></line>
+                <line class="logo-stroke" x1="296" y1="392" x2="540" y2="590" stroke-width="12"></line>
+                <line class="logo-stroke" x1="296" y1="632" x2="540" y2="590" stroke-width="12"></line>
+                <line class="logo-stroke" x1="296" y1="392" x2="540" y2="744" stroke-width="12"></line>
+                <line class="logo-stroke" x1="296" y1="632" x2="540" y2="744" stroke-width="12"></line>
+                <line class="logo-stroke" x1="540" y1="280" x2="785" y2="512" stroke-width="12"></line>
+                <line class="logo-stroke" x1="540" y1="590" x2="785" y2="512" stroke-width="12"></line>
+                <line class="logo-stroke" x1="540" y1="435" x2="785" y2="512" stroke-width="12"></line>
+                <line class="logo-stroke" x1="540" y1="744" x2="785" y2="512" stroke-width="12"></line>
+                <g transform="translate(296, 392)">
+                    <circle class="logo-fill" cx="0" cy="0" r="51"></circle>
+                    <circle class="logo-border" cx="0" cy="0" r="51" fill="none" stroke-width="6"></circle>
+                </g>
+                <g transform="translate(296, 632)">
+                    <circle class="logo-fill" cx="0" cy="0" r="51"></circle>
+                    <circle class="logo-border" cx="0" cy="0" r="51" fill="none" stroke-width="6"></circle>
+                </g>
+                <g transform="translate(540, 280)">
+                    <circle class="logo-fill" cx="0" cy="0" r="51"></circle>
+                    <circle class="logo-border" cx="0" cy="0" r="51" fill="none" stroke-width="6"></circle>
+                </g>
+                <g transform="translate(540, 435)">
+                    <circle class="logo-fill" cx="0" cy="0" r="51"></circle>
+                    <circle class="logo-border" cx="0" cy="0" r="51" fill="none" stroke-width="6"></circle>
+                </g>
+                <g transform="translate(540, 590)">
+                    <circle class="logo-fill" cx="0" cy="0" r="51"></circle>
+                    <circle class="logo-border" cx="0" cy="0" r="51" fill="none" stroke-width="6"></circle>
+                </g>
+                <g transform="translate(540, 744)">
+                    <circle class="logo-fill" cx="0" cy="0" r="51"></circle>
+                    <circle class="logo-border" cx="0" cy="0" r="51" fill="none" stroke-width="6"></circle>
+                </g>
+                <g transform="translate(785, 512)">
+                    <circle class="logo-fill" cx="0" cy="0" r="51"></circle>
+                    <circle class="logo-border" cx="0" cy="0" r="51" fill="none" stroke-width="6"></circle>
+                </g>
+            </svg>
+            <svg id="logo-spinner" class="center logo-spinner" viewbox="0 0 1024 1024">
+                <g transform="translate(512, 512)" style="opacity: 1">
+                    <path class="logo-spinner-stroke" d="M-431,0 A-431,-431 0 0,1 0,-431" stroke-width="24" fill="None">
+                    </path>
+                </g>
+            </svg>
+        </div>
+        <div class="center logo-message">
+            <div style="height: 30px; text-align: center;">Version <span id="version" class="select">{version}</span>
+            </div>
+            <div style="height: 30px; text-align: center;">Copyright &copy; <a href="https://www.lutzroeder.com"
+                    target="blank_">Lutz Roeder</a></div>
+        </div>
+        <a id="logo-github" class="center logo-github" href="https://github.com/lutzroeder/netron" target="blank_">
+            <svg viewbox="0 0 438.549 438.549">
+                <path class="logo-fill" d="M409.132,114.573c-19.608-33.596-46.205-60.194-79.798-79.8C295.736,15.166,259.057,5.365,219.271,5.365
+                c-39.781,0-76.472,9.804-110.063,29.408c-33.596,19.605-60.192,46.204-79.8,79.8C9.803,148.168,0,184.854,0,224.63
+                c0,47.78,13.94,90.745,41.827,128.906c27.884,38.164,63.906,64.572,108.063,79.227c5.14,0.954,8.945,0.283,11.419-1.996
+                c2.475-2.282,3.711-5.14,3.711-8.562c0-0.571-0.049-5.708-0.144-15.417c-0.098-9.709-0.144-18.179-0.144-25.406l-6.567,1.136
+                c-4.187,0.767-9.469,1.092-15.846,1c-6.374-0.089-12.991-0.757-19.842-1.999c-6.854-1.231-13.229-4.086-19.13-8.559
+                c-5.898-4.473-10.085-10.328-12.56-17.556l-2.855-6.57c-1.903-4.374-4.899-9.233-8.992-14.559
+                c-4.093-5.331-8.232-8.945-12.419-10.848l-1.999-1.431c-1.332-0.951-2.568-2.098-3.711-3.429c-1.142-1.331-1.997-2.663-2.568-3.997
+                c-0.572-1.335-0.098-2.43,1.427-3.289c1.525-0.859,4.281-1.276,8.28-1.276l5.708,0.853c3.807,0.763,8.516,3.042,14.133,6.851
+                c5.614,3.806,10.229,8.754,13.846,14.842c4.38,7.806,9.657,13.754,15.846,17.847c6.184,4.093,12.419,6.136,18.699,6.136
+                c6.28,0,11.704-0.476,16.274-1.423c4.565-0.952,8.848-2.383,12.847-4.285c1.713-12.758,6.377-22.559,13.988-29.41
+                c-10.848-1.14-20.601-2.857-29.264-5.14c-8.658-2.286-17.605-5.996-26.835-11.14c-9.235-5.137-16.896-11.516-22.985-19.126
+                c-6.09-7.614-11.088-17.61-14.987-29.979c-3.901-12.374-5.852-26.648-5.852-42.826c0-23.035,7.52-42.637,22.557-58.817
+                c-7.044-17.318-6.379-36.732,1.997-58.24c5.52-1.715,13.706-0.428,24.554,3.853c10.85,4.283,18.794,7.952,23.84,10.994
+                c5.046,3.041,9.089,5.618,12.135,7.708c17.705-4.947,35.976-7.421,54.818-7.421s37.117,2.474,54.823,7.421l10.849-6.849
+                c7.419-4.57,16.18-8.758,26.262-12.565c10.088-3.805,17.802-4.853,23.134-3.138c8.562,21.509,9.325,40.922,2.279,58.24
+                c15.036,16.18,22.559,35.787,22.559,58.817c0,16.178-1.958,30.497-5.853,42.966c-3.9,12.471-8.941,22.457-15.125,29.979
+                c-6.191,7.521-13.901,13.85-23.131,18.986c-9.232,5.14-18.182,8.85-26.84,11.136c-8.662,2.286-18.415,4.004-29.263,5.146
+                c9.894,8.562,14.842,22.077,14.842,40.539v60.237c0,3.422,1.19,6.279,3.572,8.562c2.379,2.279,6.136,2.95,11.276,1.995
+                c44.163-14.653,80.185-41.062,108.068-79.226c27.88-38.161,41.825-81.126,41.825-128.906
+                C438.536,184.851,428.728,148.168,409.132,114.573z" />
+            </svg>
+        </a>
+
+        <div class="center progress">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <input type="file" id="open-file-dialog" class="open-file-dialog" multiple="false" accept="">
+        <!-- Preload fonts to workaround Chrome SVG layout issue -->
+        <div style="font-weight: normal; color: rgba(0, 0, 0, 0.01); user-select: none;">.</div>
+        <div style="font-weight: bold; color: rgba(0, 0, 0, 0.01); user-select: none;">.</div>
+        <div style="font-weight: bold; color: rgba(0, 0, 0, 0.01); user-select: none;">.</div>
+    </div>
+    <div id="message" class="message">
+        <div id="message-text" class="message-text"></div>
+        <button id="message-button" class="logo-button message-button" tabindex="0">OK</button>
+    </div>
+    <div id="titlebar" class="titlebar">
+        <svg style="position: absolute; width: 0px; height: 0px; overflow: hidden;" aria-hidden="true">
+            <symbol id="icon-arrow-right" viewBox="0 0 1024 1024">
+                <path
+                    d="M698.75712 565.02272l-191.488 225.4848a81.73568 81.73568 0 0 1-62.48448 28.89728 81.89952 81.89952 0 0 1-62.40256-134.94272l146.432-172.4416-146.432-172.4416a81.92 81.92 0 0 1 124.88704-106.06592l191.488 225.4848a81.87904 81.87904 0 0 1 0 106.02496z">
+                </path>
+            </symbol>
+        </svg>
+        <div id="titlebar-content" class="titlebar-content">
+            <span id="titlebar-content-text" class="titlebar-content-text"></span>
+        </div>
+        <div id="titlebar-control-box" class="titlebar-control-box">
+            <div id="titlebar-close" class="titlebar-button titlebar-button-close" title="Close">
+                <svg class="titlebar-icon" aria-hidden="true">
+                    <path
+                        d="M 0,0 0,0.7 4.3,5 0,9.3 0,10 0.7,10 5,5.7 9.3,10 10,10 10,9.3 5.7,5 10,0.7 10,0 9.3,0 5,4.3 0.7,0 Z">
+                    </path>
+                </svg>
+            </div>
+            <div id="titlebar-toggle" class="titlebar-button" title="Maximize">
+                <svg id="titlebar-maximize" class="titlebar-icon" aria-hidden="true" style="position: absolute;">
+                    <path d="M 0,0 0,10 10,10 10,0 Z M 1,1 9,1 9,9 1,9 Z"></path>
+                </svg>
+                <svg id="titlebar-restore" class="titlebar-icon" aria-hidden="true" style="position: absolute;">
+                    <path
+                        d="m 2,1e-5 0,2 -2,0 0,8 8,0 0,-2 2,0 0,-8 z m 1,1 6,0 0,6 -1,0 0,-5 -5,0 z m -2,2 6,0 0,6 -6,0 z">
+                    </path>
+                </svg>
+            </div>
+            <div id="titlebar-minimize" class="titlebar-button" title="Minimize">
+                <svg class="titlebar-icon" aria-hidden="true">
+                    <path d="M 0,5 10,5 10,6 0,6 Z"></path>
+                </svg>
+            </div>
+        </div>
+    </div>
+    <div id="menu" class="menu"></div>
+    <div id="menu-button" class="menu-button">&#8801;</div>
+</body>
+
+</html>

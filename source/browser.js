@@ -1,7 +1,7 @@
 
 import * as base from './base.js';
 import { miners } from './miners.js';
-
+import config from './config.js';
 const host = {};
 
 host.BrowserHost = class {
@@ -263,7 +263,7 @@ host.BrowserHost = class {
         updateOptions()
 
 
-        const defaultUrl = `http://94.130.39.94:8081/files/243.onnx`
+        const defaultUrl = `${config.API_URL}/files/243.onnx`
 
         fetch(defaultUrl)
             .then(response => {
@@ -295,7 +295,7 @@ host.BrowserHost = class {
         if (openFileSelect) {
             openFileSelect.addEventListener('change', (e) => {
                 if (e.target.value) {
-                    const fileUrl = `http://94.130.39.94:8081/files/${e.target.value}.onnx`;
+                    const fileUrl = `${config.API_URL}/files/${e.target.value}.onnx`;
                     this._view.show('welcome spinner')
 
                     fetch(fileUrl)

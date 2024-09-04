@@ -138,12 +138,12 @@
                         <input type="text" class="params-slider" name="params-slider" value="" />
                     </div>
                     <div class="flops-container">
-                        <label for="accuracy-slider" class="slider-title">Accuracy</label>
-                        <input type="text" class="accuracy-slider" name="accuracy-slider" value="" />
-                    </div>
-                    <div class="flops-container">
                         <label for="flops-slider" class="slider-title">Flops</label>
                         <input type="text" class="flops-slider" name="flops-slider" value="" />
+                    </div>
+                    <div class="flops-container">
+                        <label for="accuracy-slider" class="slider-title">Accuracy</label>
+                        <input type="text" class="accuracy-slider" name="accuracy-slider" value="" />
                     </div>
                 </div>
                 <div class="open-file-button">
@@ -158,7 +158,10 @@
             </div>
             <div class="stats-container">
                 <div class="stats-bar">
-                    <p class="stats-value" id="uid-value">0</p>
+                    <a class="hf-link" target="_blank" id="hf-link" href="#">
+                        <p class="stats-value" id="uid-value">0</p>
+                        <img src="link-icon.png" class="link-img" />
+                    </a>
                 </div>
                 <div class="stats-bar">
                     <p class="stats-title">Score</p>
@@ -172,10 +175,12 @@
                     <p class="stats-value" id="params-value">46,000</p>
                 </div>
                 <div class="stats-bar">
-                    <div class="flex justify-between">
-                        <p class="stats-title">Flops</p>
-                    </div>
+                    <p class="stats-title">Flops</p>
                     <p class="stats-value" id="flops-value">13.0</p>
+                </div>
+                <div class="stats-bar">
+                    <p class="stats-title">Block</p>
+                    <p class="stats-value" id="block-value">3741058</p>
                 </div>
                 <div class="stats-bar">
                     <p class="stats-title">Accuracy</p>

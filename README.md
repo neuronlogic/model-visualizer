@@ -10,7 +10,7 @@ This project provides a custom model visualizer inspired by Netron. It includes 
 
 - Node.js (v18.x or later)
 - npm (Node Package Manager)
-- PM2 (for managing background processes)
+- PM2 (for managing background processes)[Optional]
 
 ### Configuration
 
@@ -20,6 +20,10 @@ This project provides a custom model visualizer inspired by Netron. It includes 
 
    ```javascript
     API_URL: 'your_backend_url'
+   ```
+   Example:
+   ```javascript
+    API_URL: 'http://localhost:8081'
    ```
 
 ### Running the Project
@@ -32,7 +36,7 @@ This project provides a custom model visualizer inspired by Netron. It includes 
 
    This command will start the development server, and you can access the web interface through your browser.
 
-2. **Using PM2 for Background Server**
+2. **Using PM2 for Background Server**[Optional]
 
    To run the server as a background process with PM2:
 

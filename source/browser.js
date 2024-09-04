@@ -180,6 +180,7 @@ host.BrowserHost = class {
             return;
         }
         const openFileSelect = this._element('open-file-select');
+        const hfLink = document.getElementById("hf-link");
         const scoreElement = this._element('score-value');
         const uidElement = this._element('uid-value');
         const paramsElement = this._element('params-value');
@@ -188,19 +189,43 @@ host.BrowserHost = class {
         const evaluateDateElement = this._element('evaluate-date');
         const paretoElement = this._element('pareto');
 
-        let paramsSlider = { from: 0, to: 9999999 },
-            accuracySlider = { from: 0, to: 100 },
-            flopsSlider = { from: 0, to: 1000 };
+        function calculateMinMax(data, key) {
+            return data.reduce((acc, current) => {
+                if (current[key] < acc.min) acc.min = current[key];
+                if (current[key] > acc.max) acc.max = current[key];
+                return acc;
+            }, { min: Infinity, max: -Infinity });
+        };
+
+        const flopsMinMax = calculateMinMax(miners, 'flops');
+        const paramsMinMax = calculateMinMax(miners, 'params');
+
+        let paramsSlider = { from: paramsMinMax.min / 1e6, to: paramsMinMax.max / 1e6 },
+            flopsSlider = { from: flopsMinMax.min / 1e6, to: flopsMinMax.max / 1e6 },
+            accuracySlider = { from: 0, to: 100 };
+
 
         $(".params-slider").ionRangeSlider({
             type: "double",
-            min: 0,
-            max: 100,
+            min: paramsMinMax.min / 1e6,
+            max: paramsMinMax.max / 1e6,
             from: 0,
             step: 0.001,
             postfix: 'M',
             onChange: function (data) {
                 paramsSlider = data;
+                updateOptions();
+            },
+        });
+        $(".flops-slider").ionRangeSlider({
+            type: "double",
+            min: flopsMinMax.min / 1e6,
+            max: flopsMinMax.max / 1e6,
+            from: 0,
+            step: 1,
+            postfix: 'M',
+            onChange: function (data) {
+                flopsSlider = data;
                 updateOptions();
             },
         });
@@ -217,18 +242,10 @@ host.BrowserHost = class {
             },
         });
 
-        $(".flops-slider").ionRangeSlider({
-            type: "double",
-            min: 0,
-            max: 1000,
-            from: 0,
-            step: 1,
-            onChange: function (data) {
-                flopsSlider = data;
-                updateOptions();
-            },
-        });
 
+
+
+        console.log(flopsMinMax, paramsMinMax)
         function updateOptions() {
             if (!paramsSlider || !accuracySlider || !flopsSlider) return;
 
@@ -240,8 +257,8 @@ host.BrowserHost = class {
 
             const filteredMiners = miners.filter(miner => {
                 const meetsParams = miner.params >= paramsSlider.from * 1e6 && miner.params <= paramsSlider.to * 1e6;
+                const meetsFlops = miner.flops >= flopsSlider.from * 1e6 && miner.flops <= flopsSlider.to * 1e6;
                 const meetsAccuracy = miner.accuracy >= accuracySlider.from && miner.accuracy <= accuracySlider.to;
-                const meetsFlops = miner.flops >= flopsSlider.from && miner.flops <= flopsSlider.to;
                 const meetsRewardCondition = rewardOnly ? miner.reward : true;
 
                 return meetsParams && meetsAccuracy && meetsFlops && meetsRewardCondition;
@@ -270,10 +287,11 @@ host.BrowserHost = class {
                 if (response.status === 200) {
                     const result = miners.find(miner => +miner.uid === +"243");
                     uidElement.innerHTML = result.uid;
+                    hfLink.href = `https://huggingface.co/${result.hf_account}`;
                     paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';
                     scoreElement.innerHTML = result.score;
                     paramsElement.innerHTML = this.formatNumber(result.params);
-                    flopsElement.innerHTML = result.flops;
+                    flopsElement.innerHTML = this.formatNumber(result.flops);
                     commitDateElement.innerText = this.formatDate(result.commit_date);
                     evaluateDateElement.innerHTML = this.formatDate(result.eval_date);
                     this.setProgress(result.accuracy)
@@ -303,10 +321,11 @@ host.BrowserHost = class {
                             if (response.status === 200) {
                                 const result = miners.find(miner => +miner.uid === +e.target.value);
                                 uidElement.innerHTML = result.uid;
+                                hfLink.href = `https://huggingface.co/${result.hf_account}`;
                                 paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';
                                 scoreElement.innerHTML = result.score;
                                 paramsElement.innerHTML = this.formatNumber(result.params);
-                                flopsElement.innerHTML = result.flops;
+                                flopsElement.innerHTML = this.formatNumber(result.flops);
                                 commitDateElement.innerText = this.formatDate(result.commit_date);
                                 evaluateDateElement.innerHTML = this.formatDate(result.eval_date);
                                 this.setProgress(result.accuracy)

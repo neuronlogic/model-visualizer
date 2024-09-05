@@ -180,6 +180,7 @@ host.BrowserHost = class {
             return;
         }
         const openFileSelect = this._element('open-file-select');
+        const minerControlSelect = this._element('miner-control');
         const hfLink = document.getElementById("hf-link");
         const scoreElement = this._element('score-value');
         const uidElement = this._element('uid-value');
@@ -188,6 +189,13 @@ host.BrowserHost = class {
         const commitDateElement = this._element('commit-date');
         const evaluateDateElement = this._element('evaluate-date');
         const paretoElement = this._element('pareto');
+        
+        /*control-button option*/
+        const controlElement = this._element('control-button')
+
+        controlElement.addEventListener('click', function() {
+            minerControlSelect.classList.toggle('show');
+        });
 
         function calculateMinMax(data, key) {
             return data.reduce((acc, current) => {
@@ -241,11 +249,7 @@ host.BrowserHost = class {
                 updateOptions();
             },
         });
-
-
-
-
-        console.log(flopsMinMax, paramsMinMax)
+        
         function updateOptions() {
             if (!paramsSlider || !accuracySlider || !flopsSlider) return;
 

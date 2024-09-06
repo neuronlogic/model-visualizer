@@ -293,7 +293,7 @@ host.BrowserHost = class {
                     uidElement.innerHTML = result.uid;
                     hfLink.href = `https://huggingface.co/${result.hf_account}`;
                     paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';
-                    scoreElement.innerHTML = result.score;
+                    scoreElement.innerHTML = result.score.toFixed(10);
                     paramsElement.innerHTML = this.formatNumber(result.params);
                     flopsElement.innerHTML = this.formatNumber(result.flops);
                     commitDateElement.innerText = this.formatDate(result.commit_date);
@@ -305,7 +305,6 @@ host.BrowserHost = class {
             .then(blob => {
                 const fileName = defaultUrl.split('/').pop(); // Extract the file name from the URL
                 const file = new File([blob], fileName, { type: 'application/octet-stream' });
-                console.log(file)
                 if (this._view.accept(file.name, file.size)) {
                     this._open(file, [file]);
                 }
@@ -327,7 +326,7 @@ host.BrowserHost = class {
                                 uidElement.innerHTML = result.uid;
                                 hfLink.href = `https://huggingface.co/${result.hf_account}`;
                                 paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';
-                                scoreElement.innerHTML = result.score;
+                                scoreElement.innerHTML = result.score.toFixed(10);
                                 paramsElement.innerHTML = this.formatNumber(result.params);
                                 flopsElement.innerHTML = this.formatNumber(result.flops);
                                 commitDateElement.innerText = this.formatDate(result.commit_date);

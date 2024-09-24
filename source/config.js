@@ -1,5 +1,5 @@
 const config = {
-    API_URL: 'http://94.130.39.94:8081'
+    API_URL: 'http://192.99.44.178:8081'
 };
 
 export default config;

@@ -1,6 +1,5 @@
 
 import * as base from './base.js';
-import { miners } from './miners.js';
 import config from './config.js';
 const host = {};
 
@@ -15,6 +14,7 @@ host.BrowserHost = class {
             throw new Error('window.eval() not supported.');
         };
         this._meta = {};
+        this._miners = [];
         for (const element of Array.from(this._document.getElementsByTagName('meta'))) {
             if (element.name !== undefined && element.content !== undefined) {
                 this._meta[element.name] = this._meta[element.name] || [];
@@ -145,7 +145,23 @@ host.BrowserHost = class {
         await capabilities();
     }
 
+    async getMiners() {
+        try {
+            const response = await fetch(`${config.API_URL}/get-miners`);  // Ensure your API URL is correct in config.js
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            this._miners = data;
+        } catch (error) {
+        }
+    }
+
     async start() {
+
+        await this.getMiners();
+        const miners  = this._miners;
+        console.log(miners)
         if (this._meta.file) {
             const [url] = this._meta.file;
             if (this._view.accept(url)) {
@@ -186,7 +202,7 @@ host.BrowserHost = class {
         const uidElement = this._element('uid-value');
         const paramsElement = this._element('params-value');
         const flopsElement = this._element('flops-value');
-        const commitDateElement = this._element('commit-date');
+        // const commitDateElement = this._element('commit-date');
         const evaluateDateElement = this._element('evaluate-date');
         const paretoElement = this._element('pareto');
         
@@ -293,10 +309,10 @@ host.BrowserHost = class {
                     uidElement.innerHTML = result.uid;
                     hfLink.href = `https://huggingface.co/${result.hf_account}`;
                     paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';
-                    scoreElement.innerHTML = result.score.toFixed(10);
+                    scoreElement.innerHTML = result.score.toFixed(4);
                     paramsElement.innerHTML = this.formatNumber(result.params);
                     flopsElement.innerHTML = this.formatNumber(result.flops);
-                    commitDateElement.innerText = this.formatDate(result.commit_date);
+                    // commitDateElement.innerText = this.formatDate(result.commit_date);
                     evaluateDateElement.innerHTML = this.formatDate(result.eval_date);
                     this.setProgress(result.accuracy)
                 }
@@ -326,10 +342,10 @@ host.BrowserHost = class {
                                 uidElement.innerHTML = result.uid;
                                 hfLink.href = `https://huggingface.co/${result.hf_account}`;
                                 paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';
-                                scoreElement.innerHTML = result.score.toFixed(10);
+                                scoreElement.innerHTML = result.score.toFixed(4);
                                 paramsElement.innerHTML = this.formatNumber(result.params);
                                 flopsElement.innerHTML = this.formatNumber(result.flops);
-                                commitDateElement.innerText = this.formatDate(result.commit_date);
+                                // commitDateElement.innerText = this.formatDate(result.commit_date);
                                 evaluateDateElement.innerHTML = this.formatDate(result.eval_date);
                                 this.setProgress(result.accuracy)
                             }

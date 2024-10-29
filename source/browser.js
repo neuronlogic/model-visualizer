@@ -161,7 +161,6 @@ host.BrowserHost = class {
 
         await this.getMiners();
         const miners  = this._miners;
-        console.log(miners)
         if (this._meta.file) {
             const [url] = this._meta.file;
             if (this._view.accept(url)) {
@@ -354,7 +353,6 @@ host.BrowserHost = class {
                         .then(blob => {
                             const fileName = fileUrl.split('/').pop(); // Extract the file name from the URL
                             const file = new File([blob], fileName, { type: 'application/octet-stream' });
-                            console.log(file)
                             if (this._view.accept(file.name, file.size)) {
                                 this._open(file, [file]);
                             }

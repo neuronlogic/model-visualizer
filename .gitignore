@@ -8,3 +8,5 @@ yarn.lock
 *.pyc
 .venv
 files
+.vscode
+.github

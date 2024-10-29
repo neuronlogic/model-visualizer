@@ -1,5 +1,5 @@
 const config = {
-    API_URL: 'http://192.99.44.178:8081'
+    API_URL: 'https://dashboard.naschain.ai/api',
 };
 
 export default config;

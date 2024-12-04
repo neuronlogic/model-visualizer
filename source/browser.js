@@ -145,22 +145,23 @@ host.BrowserHost = class {
         await capabilities();
     }
 
-    async getMiners() {
+    async getMiners(validatorId) {
         try {
-            const response = await fetch(`${config.API_URL}/get-miners`);  // Ensure your API URL is correct in config.js
+            const response = await fetch(`${config.API_URL}/get-miners/${validatorId}`);  // Ensure your API URL is correct in config.js
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
             this._miners = data;
         } catch (error) {
+            this._miners = [];
         }
     }
 
     async start() {
 
-        await this.getMiners();
-        const miners  = this._miners;
+        await this.getMiners(0);
+        let miners  = this._miners;
         if (this._meta.file) {
             const [url] = this._meta.file;
             if (this._view.accept(url)) {
@@ -212,99 +213,114 @@ host.BrowserHost = class {
             minerControlSelect.classList.toggle('show');
         });
 
-        function calculateMinMax(data, key) {
-            return data.reduce((acc, current) => {
-                if (current[key] < acc.min) acc.min = current[key];
-                if (current[key] > acc.max) acc.max = current[key];
-                return acc;
-            }, { min: Infinity, max: -Infinity });
-        };
-
-        const flopsMinMax = calculateMinMax(miners, 'flops');
-        const paramsMinMax = calculateMinMax(miners, 'params');
-
-        let paramsSlider = { from: paramsMinMax.min / 1e6, to: paramsMinMax.max / 1e6 },
-            flopsSlider = { from: flopsMinMax.min / 1e6, to: flopsMinMax.max / 1e6 },
-            accuracySlider = { from: 0, to: 100 };
-
-
-        $(".params-slider").ionRangeSlider({
-            type: "double",
-            min: paramsMinMax.min / 1e6,
-            max: paramsMinMax.max / 1e6,
-            from: 0,
-            step: 0.001,
-            postfix: 'M',
-            onChange: function (data) {
-                paramsSlider = data;
-                updateOptions();
-            },
-        });
-        $(".flops-slider").ionRangeSlider({
-            type: "double",
-            min: flopsMinMax.min / 1e6,
-            max: flopsMinMax.max / 1e6,
-            from: 0,
-            step: 1,
-            postfix: 'M',
-            onChange: function (data) {
-                flopsSlider = data;
-                updateOptions();
-            },
-        });
-
-        $(".accuracy-slider").ionRangeSlider({
-            type: "double",
-            min: 0,
-            max: 100,
-            from: 0,
-            step: 1,
-            onChange: function (data) {
-                accuracySlider = data;
-                updateOptions();
-            },
-        });
-        
-        function updateOptions() {
-            if (!paramsSlider || !accuracySlider || !flopsSlider) return;
-
-            let text = '<option class="select-value" value="" disabled selected hidden></option>';
-
-            const selectedRadioValue = document.querySelector('input[name="radio-switch-name"]:checked').value;
-
-            const rewardOnly = selectedRadioValue === "reward";
-
-            const filteredMiners = miners.filter(miner => {
-                const meetsParams = miner.params >= paramsSlider.from * 1e6 && miner.params <= paramsSlider.to * 1e6;
-                const meetsFlops = miner.flops >= flopsSlider.from * 1e6 && miner.flops <= flopsSlider.to * 1e6;
-                const meetsAccuracy = miner.accuracy >= accuracySlider.from && miner.accuracy <= accuracySlider.to;
-                const meetsRewardCondition = rewardOnly ? miner.reward : true;
-
-                return meetsParams && meetsAccuracy && meetsFlops && meetsRewardCondition;
-            });
-
-            const sortedMiners = filteredMiners.sort((a, b) => a.uid - b.uid);
-
-            for (const index in sortedMiners) {
-                const uid = sortedMiners[index].uid;
-                text += `<option class="select-value" value="${uid}">${uid}</option>`;
+        window.addEventListener('message', async (event) => {
+            if (event.origin !== 'http://135.181.22.42:8082') {
+              return; // Ignore messages from unauthorized origins
             }
-            openFileSelect.innerHTML = text;
+            await this.getMiners(event.data);
+            miners = this._miners;
+
+            updateMiners();
+            // You can do something with the message here
+          });
+
+        function updateMiners() {
+            function calculateMinMax(data, key) {
+                return data.reduce((acc, current) => {
+                    if (current[key] < acc.min) acc.min = current[key];
+                    if (current[key] > acc.max) acc.max = current[key];
+                    return acc;
+                }, { min: Infinity, max: -Infinity });
+            };
+            
+            const flopsMinMax = calculateMinMax(miners, 'flops');
+            const paramsMinMax = calculateMinMax(miners, 'params');
+    
+            let paramsSlider = { from: paramsMinMax.min / 1e6, to: paramsMinMax.max / 1e6 },
+                flopsSlider = { from: flopsMinMax.min / 1e6, to: flopsMinMax.max / 1e6 },
+                accuracySlider = { from: 0, to: 100 };
+    
+    
+            $(".params-slider").ionRangeSlider({
+                type: "double",
+                min: paramsMinMax.min / 1e6,
+                max: paramsMinMax.max / 1e6,
+                from: 0,
+                step: 0.001,
+                postfix: 'M',
+                onChange: function (data) {
+                    paramsSlider = data;
+                    updateOptions();
+                },
+            });
+            $(".flops-slider").ionRangeSlider({
+                type: "double",
+                min: flopsMinMax.min / 1e6,
+                max: flopsMinMax.max / 1e6,
+                from: 0,
+                step: 1,
+                postfix: 'M',
+                onChange: function (data) {
+                    flopsSlider = data;
+                    updateOptions();
+                },
+            });
+    
+            $(".accuracy-slider").ionRangeSlider({
+                type: "double",
+                min: 0,
+                max: 100,
+                from: 0,
+                step: 1,
+                onChange: function (data) {
+                    accuracySlider = data;
+                    updateOptions();
+                },
+            });
+            
+            function updateOptions() {
+                if (!paramsSlider || !accuracySlider || !flopsSlider) return;
+    
+                let text = '<option class="select-value" value="" disabled selected hidden></option>';
+    
+                const selectedRadioValue = document.querySelector('input[name="radio-switch-name"]:checked').value;
+    
+                const rewardOnly = selectedRadioValue === "reward";
+    
+                const filteredMiners = miners.filter(miner => {
+                    const meetsParams = miner.params >= paramsSlider.from * 1e6 && miner.params <= paramsSlider.to * 1e6;
+                    const meetsFlops = miner.flops >= flopsSlider.from * 1e6 && miner.flops <= flopsSlider.to * 1e6;
+                    const meetsAccuracy = miner.accuracy >= accuracySlider.from && miner.accuracy <= accuracySlider.to;
+                    const meetsRewardCondition = rewardOnly ? miner.reward : true;
+    
+                    return meetsParams && meetsAccuracy && meetsFlops && meetsRewardCondition;
+                });
+    
+                const sortedMiners = filteredMiners.sort((a, b) => a.uid - b.uid);
+    
+                for (const index in sortedMiners) {
+                    const uid = sortedMiners[index].uid;
+                    text += `<option class="select-value" value="${uid}">${uid}</option>`;
+                }
+                openFileSelect.innerHTML = text;
+            }
+
+            updateOptions();
+            
+            document.querySelectorAll('input[name="radio-switch-name"]').forEach(radio => {
+                radio.addEventListener('click', updateOptions);
+            });
         }
 
-        document.querySelectorAll('input[name="radio-switch-name"]').forEach(radio => {
-            radio.addEventListener('click', updateOptions);
-        });
-
-        updateOptions()
+        updateMiners();
 
 
-        const defaultUrl = `${config.API_URL}/files/243.onnx`
+        const defaultUrl = `${config.API_URL}/files/0.onnx`
 
         fetch(defaultUrl)
             .then(response => {
                 if (response.status === 200) {
-                    const result = miners.find(miner => +miner.uid === +"243");
+                    const result = miners.find(miner => +miner.uid === +"0");
                     uidElement.innerHTML = result.uid;
                     hfLink.href = `https://huggingface.co/${result.hf_account}`;
                     paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';

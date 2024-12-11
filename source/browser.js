@@ -1,4 +1,3 @@
-
 import * as base from './base.js';
 import config from './config.js';
 const host = {};
@@ -145,9 +144,10 @@ host.BrowserHost = class {
         await capabilities();
     }
 
-    async getMiners(validatorId) {
+    async getMiners({ selectedId, selectedDataset }) {
+
         try {
-            const response = await fetch(`${config.API_URL}/get-miners/${validatorId}`);  // Ensure your API URL is correct in config.js
+            const response = await fetch(`${config.API_URL}/get-miners/${selectedId}?status=${selectedDataset}`);  // Ensure your API URL is correct in config.js
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
@@ -159,9 +159,63 @@ host.BrowserHost = class {
     }
 
     async start() {
+        // Initialize miners with empty array if not set
+        this._miners = this._miners || [];
+        let miners = this._miners;
 
-        await this.getMiners(0);
-        let miners  = this._miners;
+        let validatorId = localStorage.getItem('validatorId') ? parseInt(localStorage.getItem('validatorId')) : 0;
+        let dataset = localStorage.getItem('dataset') || 'current';
+
+        dataset = dataset.replace(/"/g, ''); // Remove any quotes
+        dataset = dataset === 'archived' ? 'archived' : 'current'; // Ensure valid value
+
+        // Add message event listener to receive data from parent
+        window.addEventListener('message', async (event) => {
+            // Verify message origin for security
+            if (event.origin !== "http://localhost:8082") {
+                return; // Ignore messages from unauthorized origins
+            }
+            const selectedId = event.data.selectedValidator;
+            const selectedDataset = event.data.dataset;
+
+            localStorage.setItem('validatorId', selectedId);
+            localStorage.setItem('dataset', selectedDataset);
+
+
+            await this.getMiners({ selectedId, selectedDataset });
+            miners = this._miners;
+
+            this.set('validatorId', selectedId);
+            this.set('dataset', selectedDataset);
+
+            // Update UI with new miners data
+            updateMiners();
+
+            // // Load default model for the new validator/dataset
+            // const defaultUrl = `${config.API_URL}/files/${validatorId}.onnx?status=${dataset}`;
+            // try {
+            //     const response = await fetch(defaultUrl);
+            //     if (response.status === 200) {
+            //         const result = miners.find(miner => +miner.uid === +validatorId);
+            //         // Update UI elements with new miner data
+            //         this._updateMinerDetails(result);
+
+            //         const blob = await response.blob();
+            //         const fileName = defaultUrl.split('/').pop();
+            //         const file = new File([blob], fileName, { type: 'application/octet-stream' });
+            //         if (this._view.accept(file.name, file.size)) {
+            //             await this._open(file, [file]);
+            //         }
+            //     }
+            // } catch (error) {
+            //     console.error('Error fetching file:', error);
+            // }
+        });
+
+        // Get initial miners data
+        await this.getMiners({ selectedId: validatorId, selectedDataset: dataset });
+        miners = this._miners;
+
         if (this._meta.file) {
             const [url] = this._meta.file;
             if (this._view.accept(url)) {
@@ -202,29 +256,20 @@ host.BrowserHost = class {
         const uidElement = this._element('uid-value');
         const paramsElement = this._element('params-value');
         const flopsElement = this._element('flops-value');
+        const datasetElement = this._element('dataset-value');
         // const commitDateElement = this._element('commit-date');
         const evaluateDateElement = this._element('evaluate-date');
         const paretoElement = this._element('pareto');
-        
+
         /*control-button option*/
         const controlElement = this._element('control-button')
 
-        controlElement.addEventListener('click', function() {
+        controlElement.addEventListener('click', function () {
             minerControlSelect.classList.toggle('show');
         });
 
-        window.addEventListener('message', async (event) => {
-            if (event.origin !== 'http://135.181.22.42:8082') {
-              return; // Ignore messages from unauthorized origins
-            }
-            await this.getMiners(event.data);
-            miners = this._miners;
-
-            updateMiners();
-            // You can do something with the message here
-          });
-
         function updateMiners() {
+
             function calculateMinMax(data, key) {
                 return data.reduce((acc, current) => {
                     if (current[key] < acc.min) acc.min = current[key];
@@ -232,15 +277,15 @@ host.BrowserHost = class {
                     return acc;
                 }, { min: Infinity, max: -Infinity });
             };
-            
+
             const flopsMinMax = calculateMinMax(miners, 'flops');
             const paramsMinMax = calculateMinMax(miners, 'params');
-    
+
             let paramsSlider = { from: paramsMinMax.min / 1e6, to: paramsMinMax.max / 1e6 },
                 flopsSlider = { from: flopsMinMax.min / 1e6, to: flopsMinMax.max / 1e6 },
                 accuracySlider = { from: 0, to: 100 };
-    
-    
+
+
             $(".params-slider").ionRangeSlider({
                 type: "double",
                 min: paramsMinMax.min / 1e6,
@@ -265,7 +310,7 @@ host.BrowserHost = class {
                     updateOptions();
                 },
             });
-    
+
             $(".accuracy-slider").ionRangeSlider({
                 type: "double",
                 min: 0,
@@ -277,75 +322,77 @@ host.BrowserHost = class {
                     updateOptions();
                 },
             });
-            
+
             function updateOptions() {
                 if (!paramsSlider || !accuracySlider || !flopsSlider) return;
-    
+
                 let text = '<option class="select-value" value="" disabled selected hidden></option>';
-    
+
                 const selectedRadioValue = document.querySelector('input[name="radio-switch-name"]:checked').value;
-    
+
                 const rewardOnly = selectedRadioValue === "reward";
-    
+
                 const filteredMiners = miners.filter(miner => {
                     const meetsParams = miner.params >= paramsSlider.from * 1e6 && miner.params <= paramsSlider.to * 1e6;
                     const meetsFlops = miner.flops >= flopsSlider.from * 1e6 && miner.flops <= flopsSlider.to * 1e6;
                     const meetsAccuracy = miner.accuracy >= accuracySlider.from && miner.accuracy <= accuracySlider.to;
                     const meetsRewardCondition = rewardOnly ? miner.reward : true;
-    
+
                     return meetsParams && meetsAccuracy && meetsFlops && meetsRewardCondition;
                 });
-    
+
                 const sortedMiners = filteredMiners.sort((a, b) => a.uid - b.uid);
-    
+
                 for (const index in sortedMiners) {
                     const uid = sortedMiners[index].uid;
                     text += `<option class="select-value" value="${uid}">${uid}</option>`;
                 }
+
                 openFileSelect.innerHTML = text;
             }
 
             updateOptions();
-            
+
             document.querySelectorAll('input[name="radio-switch-name"]').forEach(radio => {
                 radio.addEventListener('click', updateOptions);
             });
         }
 
+        // Initial UI setup with current miners data
         updateMiners();
 
+        // const defaultUrl = `${config.API_URL}/files/0.onnx?status=${"current"}`
 
-        const defaultUrl = `${config.API_URL}/files/0.onnx`
-
-        fetch(defaultUrl)
-            .then(response => {
-                if (response.status === 200) {
-                    const result = miners.find(miner => +miner.uid === +"0");
-                    uidElement.innerHTML = result.uid;
-                    hfLink.href = `https://huggingface.co/${result.hf_account}`;
-                    paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';
-                    scoreElement.innerHTML = result.score.toFixed(4);
-                    paramsElement.innerHTML = this.formatNumber(result.params);
-                    flopsElement.innerHTML = this.formatNumber(result.flops);
-                    // commitDateElement.innerText = this.formatDate(result.commit_date);
-                    evaluateDateElement.innerHTML = this.formatDate(result.eval_date);
-                    this.setProgress(result.accuracy)
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const fileName = defaultUrl.split('/').pop(); // Extract the file name from the URL
-                const file = new File([blob], fileName, { type: 'application/octet-stream' });
-                if (this._view.accept(file.name, file.size)) {
-                    this._open(file, [file]);
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching file:', error);
-            });
+        // fetch(defaultUrl)
+        //     .then(response => {
+        //         if (response.status === 200) {
+        //             const result = miners.find(miner => +miner.uid === +"0");
+        //             uidElement.innerHTML = result.uid;
+        //             hfLink.href = `https://huggingface.co/${result.hf_account}`;
+        //             paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';
+        //             scoreElement.innerHTML = result.score.toFixed(4);
+        //             paramsElement.innerHTML = this.formatNumber(result.params);
+        //             flopsElement.innerHTML = this.formatNumber(result.flops);
+        //             // commitDateElement.innerText = this.formatDate(result.commit_date);
+        //             evaluateDateElement.innerHTML = this.formatDate(result.eval_date);
+        //             this.setProgress(result.accuracy)
+        //         }
+        //         return response.blob();
+        //     })
+        //     .then(blob => {
+        //         const fileName = defaultUrl.split('/').pop(); // Extract the file name from the URL
+        //         const file = new File([blob], fileName, { type: 'application/octet-stream' });
+        //         if (this._view.accept(file.name, file.size)) {
+        //             this._open(file, [file]);
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error('Error fetching file:', error);
+        //     });
 
         if (openFileSelect) {
             openFileSelect.addEventListener('change', (e) => {
+
                 if (e.target.value) {
                     const fileUrl = `${config.API_URL}/files/${e.target.value}.onnx`;
                     this._view.show('welcome spinner')
@@ -360,6 +407,7 @@ host.BrowserHost = class {
                                 scoreElement.innerHTML = result.score.toFixed(4);
                                 paramsElement.innerHTML = this.formatNumber(result.params);
                                 flopsElement.innerHTML = this.formatNumber(result.flops);
+                                datasetElement.innerHTML = dataset === "current" ? "CIFAR-100" : "CIFAR-10";
                                 // commitDateElement.innerText = this.formatDate(result.commit_date);
                                 evaluateDateElement.innerHTML = this.formatDate(result.eval_date);
                                 this.setProgress(result.accuracy)
@@ -813,6 +861,26 @@ host.BrowserHost = class {
                 button.focus();
             }
         });
+    }
+
+    // Add helper method to update miner details
+    _updateMinerDetails(result) {
+        const uidElement = this._element('uid-value');
+        const hfLink = document.getElementById("hf-link");
+        const paretoElement = this._element('pareto');
+        const scoreElement = this._element('score-value');
+        const paramsElement = this._element('params-value');
+        const flopsElement = this._element('flops-value');
+        const evaluateDateElement = this._element('evaluate-date');
+
+        uidElement.innerHTML = result.uid;
+        hfLink.href = `https://huggingface.co/${result.hf_account}`;
+        paretoElement.style.color = result.pareto ? '#4ff356' : '#ef5350';
+        scoreElement.innerHTML = result.score.toFixed(4);
+        paramsElement.innerHTML = this.formatNumber(result.params);
+        flopsElement.innerHTML = this.formatNumber(result.flops);
+        evaluateDateElement.innerHTML = this.formatDate(result.eval_date);
+        this.setProgress(result.accuracy);
     }
 };
 

@@ -576,8 +576,7 @@ select::-ms-expand {
 /* Slider_Container_End */
 
 
-/* Control_Button_Start */
-
+/* 
 .control-button {
     display: none;
     justify-content: center;
@@ -625,6 +624,7 @@ select::-ms-expand {
     }
   
 }
+ */
 
 @media all and (max-width: 768px) {
     .graph-container{

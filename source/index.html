@@ -118,40 +118,6 @@
     </div>
     <div id="logo" class="logo">
         <div class="graph-container">
-            <div class="miner-control" id="miner-control">
-                <ul class="radio-switch ">
-                    <li class="radio-switch__item">
-                        <input class="radio-switch__input ri5-sr-only" type="radio" name="radio-switch-name"
-                            id="radio-1" value="all" checked>
-                        <label class="radio-switch__label" for="radio-1">All</label>
-                    </li>
-                    <li class="radio-switch__item">
-                        <input class="radio-switch__input ri5-sr-only" type="radio" name="radio-switch-name"
-                            id="radio-2" value="reward">
-                        <label class="radio-switch__label" for="radio-2">Pareto</label>
-                        <div aria-hidden="true" class="radio-switch__marker"></div>
-                    </li>
-                </ul>
-                <div class="slider-container">
-                    <div class="flops-container">
-                        <label for="params-slider" class="slider-title">Params</label>
-                        <input type="text" class="params-slider" name="params-slider" value="" />
-                    </div>
-                    <div class="flops-container">
-                        <label for="flops-slider" class="slider-title">Flops</label>
-                        <input type="text" class="flops-slider" name="flops-slider" value="" />
-                    </div>
-                    <div class="flops-container">
-                        <label for="accuracy-slider" class="slider-title">Accuracy</label>
-                        <input type="text" class="accuracy-slider" name="accuracy-slider" value="" />
-                    </div>
-                </div>
-                <div class="open-file-button">
-                    <label class="select-label" for="open-file-select">Select Miner UID:</label>
-                    <select id="open-file-select" class="open-file-select">
-                    </select>
-                </div>
-            </div>
             <div id="graph" class="graph" tabindex="0">
                 <svg id="canvas" class="canvas" preserveaspectratio="xMidYMid meet" width="100%" height="100%">
                 </svg>
@@ -347,7 +313,7 @@
     </div>
     <div id="menu" class="menu"></div>
     <div id="menu-button" class="menu-button">&#8801;</div>
-    <div id="control-button" class="control-button">&#11095;</div>
+    <!-- <div id="control-button" class="control-button">&#11095;</div> -->
 </body>
 
 </html>
